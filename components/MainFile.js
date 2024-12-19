@@ -41,7 +41,7 @@ const MainFile = () => {
   const [isBarcodeModalVisible, setIsBarcodeModalVisible] = useState(false);
   const [currentEditingId, setCurrentEditingId] = useState(null); // Changed to ID
   const [newBarcodeValue, setNewBarcodeValue] = useState("");
-
+  const [BucketName, setBucketName] = useState("");
   // New state variable for categories
   const [categories, setCategories] = useState([]);
 
@@ -185,7 +185,9 @@ const MainFile = () => {
   useEffect(() => {
     const FetchData = async () => {
       const folderName = await AsyncStorage.getItem('folderName');
-      console.log('folderName',folderName);
+
+      console.log('folderNames',folderName);
+      setBucketName(folderName);
       // Request Camera Permissions
       setLoading(true);
       // const { status: cameraStatus } = await Camera.requestCameraPermissionsAsync();
@@ -381,19 +383,21 @@ const MainFile = () => {
 
   // Function to handle Update action
   const handleUpdate = async (item) => { // Changed to accept item instead of index
+
     try {
       let base64Image = "";
       if (item.image) {
         // Assuming the image is already in Base64 format
         base64Image = item.image.split(',')[1]; // Remove the data URI prefix
       }
+      console.log('psotfoldername',BucketName);
       console.log('base64Image',base64Image);
       const body = {
-        folderName: "grocerysquare",
+        folderName: BucketName,
         row: (parseInt(item.id) + 1).toString(), // Assuming row starts at 1
         barcode: item.barcode || "",
         image: base64Image || "",
-        category: item.category || "", // Include category in the update
+         category: item.category || "", // Include category in the update
       };
 
       const response = await fetch(
@@ -415,7 +419,7 @@ const MainFile = () => {
       Alert.alert("Success", "Data updated successfully.");
       console.log("Update response:", responseData);
     } catch (error) {
-      console.error("Error updating data:", error);
+      console.error("Error updating data make sure barcode field is not empty", error);
       Alert.alert("Error", `Failed to update data: ${error.message}`);
     }
   };
@@ -558,9 +562,7 @@ const MainFile = () => {
   );
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.heading}>Products Linking</Text>
-      
+    <View style={styles.container}>  
       {/* Search Box */}
       <View style={styles.searchContainer}>
         <TextInput
@@ -685,7 +687,6 @@ const MainFile = () => {
 
       {/* Refresh Button */}
       <Button title="Refresh" onPress={FetchAPIData} disabled={loading} />
-      <LogoutButton/>
       
       {/* Existing Image Modal */}
       <Modal
@@ -726,6 +727,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   searchContainer: {
+    marginTop: 20,
     marginBottom: 20,
     paddingHorizontal: 10,
   },
